@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Jogo da Forca da Professora - 10 Chances! | TikTok Live</title>
+  <title>Jogo da Palavra Secreta - 10 Chances! | TikTok Live</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Patrick+Hand&display=swap');
 
@@ -104,7 +104,7 @@
     }
 
     .game-title {
-      font-size: clamp(23px, 6.5vw, 32px);
+      font-size: clamp(22px, 6.2vw, 31px);
       color: #3e2723;
       text-shadow: 0 2px 0 #fff, 0 4px 10px rgba(0, 0, 0, 0.15);
       line-height: 1.05;
@@ -216,7 +216,7 @@
       transition: transform 0.2s ease;
     }
 
-    /* CAIXA DA PALAVRA AGORA NO TOPO DA LOUSA (ACIMA DO CHAT!) */
+    /* Caixa da Palavra */
     .word-hint-box {
       position: relative;
       z-index: 20;
@@ -281,7 +281,7 @@
       100% { transform: scale(1); }
     }
 
-    /* Área Central da Forca + Letras Erradas */
+    /* Área Central: Balões de Chances + Letras Tentadas */
     .hangman-stage {
       position: relative;
       flex: 1;
@@ -290,27 +290,49 @@
       justify-content: space-between;
       padding: 4px 12px 0;
       min-height: 0;
+      gap: 8px;
     }
 
-    .gallows-svg {
-      width: 128px;
-      height: 152px;
+    .balloons-box {
+      width: 132px;
       flex-shrink: 0;
-      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
+      background: rgba(0, 0, 0, 0.25);
+      border: 1.5px dashed rgba(255, 255, 255, 0.35);
+      border-radius: 14px;
+      padding: 6px;
+      text-align: center;
     }
 
-    .body-part {
-      opacity: 0;
-      transition: opacity 0.35s ease;
+    .balloons-title {
+      font-family: 'Patrick Hand', cursive;
+      font-size: 15px;
+      color: #ffe082;
+      margin-bottom: 4px;
     }
-    .body-part.visible {
-      opacity: 1;
+
+    .balloons-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      justify-items: center;
+      align-items: center;
+    }
+
+    .balloon-item {
+      font-size: 19px;
+      transition: all 0.35s ease;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+    }
+
+    .balloon-item.popped {
+      transform: scale(0.5);
+      opacity: 0.22;
+      filter: grayscale(1);
     }
 
     /* Painel de Letras Já Tentadas */
     .used-letters-box {
       flex: 1;
-      margin-left: 8px;
       background: rgba(0, 0, 0, 0.25);
       border: 1.5px dashed rgba(255, 255, 255, 0.35);
       border-radius: 14px;
@@ -352,6 +374,83 @@
       color: #ff8a80;
       border: 1px solid #ff5252;
       text-decoration: line-through;
+    }
+
+    /* Banner Novo Seguidor + Confetes */
+    #follow-banner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.6);
+      z-index: 40;
+      background: linear-gradient(135deg, #3e2723 0%, #5d4037 100%);
+      border: 3px solid #ffd54f;
+      border-radius: 20px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 25px rgba(255, 213, 79, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 90%;
+    }
+
+    #follow-banner.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .follow-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 3px solid #00e676;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #8d6e63;
+    }
+
+    .follow-text {
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .follow-tag {
+      font-size: 11px;
+      color: #00e676;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .follow-name {
+      font-size: 18px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 9px;
+      height: 14px;
+      border-radius: 2px;
+      z-index: 39;
+      pointer-events: none;
+      animation: confettiFall 2.2s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-20px) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(420px) rotate(720deg) scale(0.7);
+        opacity: 0;
+      }
     }
 
     /* Professora Bonitinha */
@@ -495,7 +594,7 @@
       margin: 6px 0;
     }
 
-    /* Barra Inferior */
+    /* Barra Inferior Segura */
     .bottom-cta {
       position: relative;
       z-index: 15;
@@ -593,7 +692,7 @@
         </div>
       </div>
 
-      <h1 class="game-title">JOGO DA FORCA</h1>
+      <h1 class="game-title">PALAVRA SECRETA</h1>
       <p class="subtitle">Comente 1 LETRA ou a PALAVRA INTEIRA!</p>
     </div>
 
@@ -623,63 +722,49 @@
     </div>
 
     <!-- Lousa Verde -->
-    <div class="blackboard-wrapper">
+    <div class="blackboard-wrapper" id="blackboard">
       <div class="board-header">
         <span class="category-badge" id="category-label">Dica: Fruta</span>
-        <span class="lives-badge" id="lives-label">❤️ 10 Chances</span>
+        <span class="lives-badge" id="lives-label">🎈 10 Chances</span>
       </div>
 
-      <!-- LINHA PONTILHADA COM AS LETRAS DA PALAVRA (NO TOPO DA LOUSA!) -->
+      <!-- Caixa da Palavra -->
       <div class="word-hint-box">
         <div class="hint-sub" id="letters-count">PALAVRA COM 7 LETRAS</div>
         <div class="word-slots" id="word-slots"></div>
       </div>
 
       <div class="hangman-stage">
-        <!-- Desenho da Forca em Giz (10 Partes!) -->
-        <svg class="gallows-svg" viewBox="0 0 180 210">
-          <!-- Estrutura da Forca -->
-          <line x1="20" y1="195" x2="110" y2="195" stroke="#ffe082" stroke-width="6" stroke-linecap="round"/>
-          <line x1="50" y1="195" x2="50" y2="20" stroke="#ffe082" stroke-width="6" stroke-linecap="round"/>
-          <line x1="50" y1="20" x2="125" y2="20" stroke="#ffe082" stroke-width="6" stroke-linecap="round"/>
-          <line x1="50" y1="50" x2="80" y2="20" stroke="#ffe082" stroke-width="5" stroke-linecap="round"/>
-          <line x1="125" y1="20" x2="125" y2="45" stroke="#fff" stroke-width="4" stroke-dasharray="4 3"/>
-
-          <!-- 1: Cabeça -->
-          <circle id="part-1" class="body-part" cx="125" cy="65" r="20" fill="none" stroke="#fff" stroke-width="5"/>
-          <!-- 2: Tronco -->
-          <line id="part-2" class="body-part" x1="125" y1="85" x2="125" y2="138" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-          <!-- 3: Braço Esquerdo -->
-          <line id="part-3" class="body-part" x1="125" y1="98" x2="98" y2="122" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-          <!-- 4: Braço Direito -->
-          <line id="part-4" class="body-part" x1="125" y1="98" x2="152" y2="122" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-          <!-- 5: Perna Esquerda -->
-          <line id="part-5" class="body-part" x1="125" y1="138" x2="102" y2="174" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-          <!-- 6: Perna Direita -->
-          <line id="part-6" class="body-part" x1="125" y1="138" x2="148" y2="174" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-          <!-- 7: Olhos -->
-          <g id="part-7" class="body-part">
-            <circle cx="118" cy="60" r="2.5" fill="#fff"/>
-            <circle cx="132" cy="60" r="2.5" fill="#fff"/>
-          </g>
-          <!-- 8: Boca Assustada -->
-          <circle id="part-8" class="body-part" cx="125" cy="72" r="4" fill="none" stroke="#ff8a80" stroke-width="2.5"/>
-          <!-- 9: Mãos -->
-          <g id="part-9" class="body-part">
-            <circle cx="96" cy="124" r="4" fill="#ffe082"/>
-            <circle cx="154" cy="124" r="4" fill="#ffe082"/>
-          </g>
-          <!-- 10: Pés / Sapatos -->
-          <g id="part-10" class="body-part">
-            <line x1="102" y1="174" x2="92" y2="174" stroke="#ff5252" stroke-width="5" stroke-linecap="round"/>
-            <line x1="148" y1="174" x2="158" y2="174" stroke="#ff5252" stroke-width="5" stroke-linecap="round"/>
-          </g>
-        </svg>
+        <!-- 10 Balões de Chances (Seguro contra filtros visuais!) -->
+        <div class="balloons-box">
+          <div class="balloons-title">Chances:</div>
+          <div class="balloons-grid" id="balloons-grid">
+            <span class="balloon-item" id="part-1">🎈</span>
+            <span class="balloon-item" id="part-2">🎈</span>
+            <span class="balloon-item" id="part-3">🎈</span>
+            <span class="balloon-item" id="part-4">🎈</span>
+            <span class="balloon-item" id="part-5">🎈</span>
+            <span class="balloon-item" id="part-6">🎈</span>
+            <span class="balloon-item" id="part-7">🎈</span>
+            <span class="balloon-item" id="part-8">🎈</span>
+            <span class="balloon-item" id="part-9">🎈</span>
+            <span class="balloon-item" id="part-10">🎈</span>
+          </div>
+        </div>
 
         <!-- Letras Tentadas -->
         <div class="used-letters-box">
           <div class="used-title">Letras Tentadas:</div>
           <div class="used-grid" id="used-grid"></div>
+        </div>
+      </div>
+
+      <!-- Banner Novo Seguidor -->
+      <div id="follow-banner">
+        <img class="follow-avatar" id="follow-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Seguidor" alt="">
+        <div class="follow-text">
+          <div class="follow-tag">🎉 NOVO SEGUIDOR!</div>
+          <div class="follow-name" id="follow-name">@Aluno</div>
         </div>
       </div>
 
@@ -741,10 +826,10 @@
       </div>
     </div>
 
-    <!-- Barra Inferior -->
+    <!-- Barra Inferior (100% dentro das regras do TikTok!) -->
     <div class="bottom-cta">
       <div class="cta-main">🔤 DIGITE 1 LETRA (Ex: A, E, S) OU A PALAVRA!</div>
-      <div class="cta-sub">⭐ Acerto = +2 a +15 pts &nbsp;|&nbsp; 🌹 Presente revela 1 letra!</div>
+      <div class="cta-sub">⭐ Acerte letras ou a palavra para subir no ranking!</div>
     </div>
 
     <!-- Modal -->
@@ -757,7 +842,8 @@
       <button class="btn-primary" onclick="saveAndConnect()">Salvar e Conectar</button>
       <hr style="border-color: rgba(255,255,255,0.15);">
       <button class="btn-secondary" id="sim-btn" onclick="toggleSimulation()">▶️ Simular Alunos Jogando</button>
-      <button class="btn-secondary" onclick="revealHelpLetter()">💡 Testar Presente (Revelar Letra)</button>
+      <button class="btn-secondary" onclick="testFollowCelebration()">🎉 Testar Novo Seguidor (Confetes)</button>
+      <button class="btn-secondary" onclick="revealHelpLetter()">💡 Revelar 1 Letra</button>
       <button class="btn-secondary" onclick="skipWord()">⏭️ Pular Palavra</button>
       <button class="btn-secondary" style="border-color: #ff5252; color: #ff8a80;" onclick="toggleModal()">Fechar</button>
     </div>
@@ -765,7 +851,6 @@
 
   <script>
     const WORDS = [
-      // Frutas & Comidas (25)
       { word: "ABACAXI", category: "Fruta" },
       { word: "MELANCIA", category: "Fruta" },
       { word: "MORANGO", category: "Fruta" },
@@ -791,8 +876,6 @@
       { word: "PANQUECA", category: "Comida" },
       { word: "OMELETE", category: "Comida" },
       { word: "MACARRAO", category: "Comida" },
-
-      // Animais (25)
       { word: "CACHORRO", category: "Animal" },
       { word: "ELEFANTE", category: "Animal" },
       { word: "GIRAFA", category: "Animal" },
@@ -818,8 +901,6 @@
       { word: "POLVO", category: "Animal" },
       { word: "BALEIA", category: "Animal" },
       { word: "PANTERA", category: "Animal" },
-
-      // Objetos & Casa (25)
       { word: "COMPUTADOR", category: "Tecnologia" },
       { word: "TELEVISAO", category: "Eletrônico" },
       { word: "GELADEIRA", category: "Cozinha" },
@@ -845,8 +926,6 @@
       { word: "COLHER", category: "Cozinha" },
       { word: "PANELA", category: "Cozinha" },
       { word: "MICROONDAS", category: "Cozinha" },
-
-      // Profissões, Esportes, Música & Lugares (25)
       { word: "PROFESSORA", category: "Profissão" },
       { word: "BOMBEIRO", category: "Profissão" },
       { word: "ASTRONAUTA", category: "Profissão" },
@@ -893,6 +972,7 @@
     let keepAliveTimer = null;
     let reconnectTimer = null;
     let currentWsUrl = '';
+    let followTimer = null;
 
     const defaultAvatars = [
       'https://api.dicebear.com/7.x/avataaars/svg?seed=Ana',
@@ -944,6 +1024,49 @@
       osc.stop(now + dur);
     }
 
+    // Animação Novo Seguidor com Foto + Confetes (Sem pontos!)
+    function showFollowCelebration(name, avatar) {
+      const banner = document.getElementById('follow-banner');
+      const fName = document.getElementById('follow-name');
+      const fAvatar = document.getElementById('follow-avatar');
+      const board = document.getElementById('blackboard');
+
+      fName.textContent = name;
+      fAvatar.src = avatar || defaultAvatars[0];
+      fAvatar.onerror = () => { fAvatar.src = defaultAvatars[0]; };
+
+      banner.classList.add('show');
+      document.getElementById('teacher-speech').textContent = `Bem-vindo(a), ${name}! 🎉`;
+
+      playTone(587.33, 0.14, 0.09);
+      setTimeout(() => playTone(783.99, 0.14, 0.09), 110);
+      setTimeout(() => playTone(1046.5, 0.3, 0.1), 220);
+
+      // Chuva de Confetes
+      const colors = ['#ffd54f', '#00e676', '#ff5252', '#40c4ff', '#ea80fc', '#ffffff'];
+      for (let i = 0; i < 32; i++) {
+        const conf = document.createElement('div');
+        conf.className = 'confetti-piece';
+        conf.style.left = `${Math.random() * 96 + 2}%`;
+        conf.style.top = `${Math.random() * 25}%`;
+        conf.style.backgroundColor = colors[i % colors.length];
+        conf.style.animationDuration = `${1.6 + Math.random() * 1.1}s`;
+        board.appendChild(conf);
+        setTimeout(() => conf.remove(), 2800);
+      }
+
+      clearTimeout(followTimer);
+      followTimer = setTimeout(() => {
+        banner.classList.remove('show');
+      }, 3600);
+    }
+
+    function testFollowCelebration() {
+      toggleModal();
+      const sampleAvatar = defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)];
+      showFollowCelebration('@MariaClara', sampleAvatar);
+    }
+
     function normalizeText(str) {
       return str
         .toUpperCase()
@@ -959,7 +1082,7 @@
 
       for (let i = 1; i <= maxWrong; i++) {
         const el = document.getElementById(`part-${i}`);
-        if (el) el.classList.remove('visible');
+        if (el) el.classList.remove('popped');
       }
 
       document.getElementById('winner-overlay').classList.remove('show');
@@ -969,7 +1092,7 @@
       const item = WORDS[currentIdx];
       document.getElementById('category-label').textContent = `Dica: ${item.category}`;
       document.getElementById('letters-count').textContent = `PALAVRA COM ${item.word.length} LETRAS`;
-      document.getElementById('lives-label').textContent = `❤️ ${maxWrong} Chances`;
+      document.getElementById('lives-label').textContent = `🎈 ${maxWrong} Chances`;
       document.getElementById('teacher-speech').textContent = `Dica: ${item.category}! Mande uma letra! ✍️`;
       renderWord();
     }
@@ -1066,10 +1189,10 @@
         playTone(220, 0.3, 0.08, 'sawtooth');
 
         const part = document.getElementById(`part-${wrongCount}`);
-        if (part) part.classList.add('visible');
+        if (part) part.classList.add('popped');
 
         const left = maxWrong - wrongCount;
-        document.getElementById('lives-label').textContent = `❤️ ${left} ${left === 1 ? 'Chance' : 'Chances'}`;
+        document.getElementById('lives-label').textContent = `🎈 ${left} ${left === 1 ? 'Chance' : 'Chances'}`;
         document.getElementById('teacher-speech').textContent = `Não tem "${letter}"! Restam ${left}! 😱`;
 
         if (wrongCount >= maxWrong) {
@@ -1113,7 +1236,7 @@
         setTimeout(() => playTone(659.25, 0.15, 0.1), 140);
         setTimeout(() => playTone(783.99, 0.4, 0.1), 280);
       } else {
-        badge.textContent = '💀 FIM DAS 10 CHANCES!';
+        badge.textContent = '🎈 FIM DAS 10 CHANCES!';
         wName.textContent = 'A palavra era:';
         wAvatar.style.display = 'none';
       }
@@ -1187,6 +1310,8 @@
 
             if (ev === 'chat' && data.comment) {
               processChat(name, avatar, data.comment);
+            } else if (ev === 'follow') {
+              showFollowCelebration(name, avatar);
             } else if (ev === 'gift') {
               revealHelpLetter();
               document.getElementById('teacher-speech').textContent = `Valeu ${name}! Letra revelada! 💡`;
