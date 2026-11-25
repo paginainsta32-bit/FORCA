@@ -575,6 +575,7 @@
       box-shadow: 0 0 35px #ffd54f;
       object-fit: cover;
       margin-bottom: 10px;
+      background: #8d6e63;
     }
 
     .winner-badge {
@@ -700,21 +701,21 @@
     <!-- Top 3 Alunos -->
     <div class="mvp-bar">
       <div class="mvp-card">
-        <img class="mvp-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aluno1" alt="">
+        <img class="mvp-avatar" referrerpolicy="no-referrer" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aluno1" alt="">
         <div class="mvp-info">
           <div class="mvp-name">1º Aguardando</div>
           <div class="mvp-pts">0 ⭐</div>
         </div>
       </div>
       <div class="mvp-card">
-        <img class="mvp-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aluno2" alt="">
+        <img class="mvp-avatar" referrerpolicy="no-referrer" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aluno2" alt="">
         <div class="mvp-info">
           <div class="mvp-name">2º Aguardando</div>
           <div class="mvp-pts">0 ⭐</div>
         </div>
       </div>
       <div class="mvp-card">
-        <img class="mvp-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aluno3" alt="">
+        <img class="mvp-avatar" referrerpolicy="no-referrer" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aluno3" alt="">
         <div class="mvp-info">
           <div class="mvp-name">3º Aguardando</div>
           <div class="mvp-pts">0 ⭐</div>
@@ -774,7 +775,7 @@
 
       <!-- Banner Comemorativo (Novo Seguidor & Presentes) -->
       <div id="celebration-banner">
-        <img class="cel-avatar" id="cel-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Seguidor" alt="">
+        <img class="cel-avatar" id="cel-avatar" referrerpolicy="no-referrer" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Seguidor" alt="">
         <div class="cel-text">
           <div class="cel-tag" id="cel-tag">🎉 NOVO SEGUIDOR!</div>
           <div class="cel-name" id="cel-name">@Aluno</div>
@@ -833,7 +834,7 @@
       <!-- Overlay Fim da Rodada -->
       <div id="winner-overlay">
         <div class="winner-badge" id="win-status-badge">🎉 PALAVRA DESCOBERTA! 🎉</div>
-        <img class="winner-avatar" id="winner-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Win" alt="">
+        <img class="winner-avatar" id="winner-avatar" referrerpolicy="no-referrer" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Win" alt="">
         <h2 id="winner-name" style="font-size: 26px; color: #fff;">@Aluno</h2>
         <div class="winner-word" id="winner-word">ABACAXI</div>
         <p style="color: #ffe082; font-size: 15px;">Próxima palavra em 4 segundos...</p>
@@ -1104,6 +1105,17 @@
       'https://api.dicebear.com/7.x/avataaars/svg?seed=Julia'
     ];
 
+    function extractTikTokAvatar(data) {
+      return (
+        data.profilePictureUrl ||
+        data.user?.profilePictureUrl ||
+        data.avatarThumb?.urlList?.[0] ||
+        data.avatarMedium?.urlList?.[0] ||
+        data.user?.avatarThumb?.urlList?.[0] ||
+        defaultAvatars[0]
+      );
+    }
+
     // Áudio
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
@@ -1159,8 +1171,8 @@
       cTag.textContent = tag;
       cName.textContent = name;
       cSub.textContent = sub;
-      cAvatar.src = avatar || defaultAvatars[0];
       cAvatar.onerror = () => { cAvatar.src = defaultAvatars[0]; };
+      cAvatar.src = avatar || defaultAvatars[0];
 
       banner.classList.add('show');
 
@@ -1291,19 +1303,25 @@
       const feed = document.getElementById('guess-feed');
       const pill = document.createElement('div');
       pill.className = 'guess-pill';
-      pill.innerHTML = `<img src="${avatar}" onerror="this.src='${defaultAvatars[0]}'"><span><b>${name}:</b> ${text}</span>`;
+      pill.innerHTML = `<img referrerpolicy="no-referrer" src="${avatar}" onerror="this.src='${defaultAvatars[0]}'"><span><b>${name}:</b> ${text}</span>`;
       feed.appendChild(pill);
       if (feed.children.length > 3) feed.removeChild(feed.firstChild);
     }
 
     function addPoints(name, avatar, pts) {
       if (!leaderboard[name]) leaderboard[name] = { name, avatar, pts: 0 };
+      if (avatar && !avatar.includes('dicebear.com')) {
+        leaderboard[name].avatar = avatar;
+      }
       leaderboard[name].pts += pts;
+
       const sorted = Object.values(leaderboard).sort((a, b) => b.pts - a.pts).slice(0, 3);
       const cards = document.querySelectorAll('.mvp-card');
       sorted.forEach((u, i) => {
         if (cards[i]) {
-          cards[i].querySelector('img').src = u.avatar;
+          const img = cards[i].querySelector('img');
+          img.onerror = () => { img.src = defaultAvatars[i % defaultAvatars.length]; };
+          img.src = u.avatar;
           cards[i].querySelector('.mvp-name').textContent = `${i + 1}º ${u.name}`;
           cards[i].querySelector('.mvp-pts').textContent = `${u.pts} ⭐`;
         }
@@ -1392,9 +1410,14 @@
       wWord.textContent = targetWord;
 
       if (won) {
+        const finalAvatar = (leaderboard[winnerName]?.avatar && !leaderboard[winnerName].avatar.includes('dicebear.com'))
+          ? leaderboard[winnerName].avatar
+          : (winnerAvatar || defaultAvatars[0]);
+
         badge.textContent = '🎉 PALAVRA DESCOBERTA! 🎉';
         wName.textContent = winnerName;
-        wAvatar.src = winnerAvatar;
+        wAvatar.onerror = () => { wAvatar.src = defaultAvatars[0]; };
+        wAvatar.src = finalAvatar;
         wAvatar.style.display = 'block';
         playTone(523.25, 0.15, 0.1);
         setTimeout(() => playTone(659.25, 0.15, 0.1), 140);
@@ -1469,8 +1492,8 @@
             if (ev === 'heartbeat' || ev === 'pong' || ev === 'status') return;
 
             const data = msg.data || msg;
-            const name = data.nickname || data.uniqueId || 'Aluno';
-            const avatar = data.profilePictureUrl || defaultAvatars[0];
+            const name = data.nickname || data.user?.nickname || data.uniqueId || 'Aluno';
+            const avatar = extractTikTokAvatar(data);
 
             if (ev === 'chat' && data.comment) {
               processChat(name, avatar, data.comment);
