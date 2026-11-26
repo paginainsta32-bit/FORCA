@@ -891,7 +891,7 @@
         <input type="text" id="ws-url-input" placeholder="wss://io.socialstream.ninja/join/vU2U3Q7T2H/4" />
       </div>
       <p class="helper-hint" id="ws-helper-text">
-        Conectado à sessão <b>vU2U3Q7T2H</b> do Social Stream Ninja. Deixe a aba da live aberta no Chrome.
+        Conectado à sessão <b>vU2U3Q7T2H</b> do Social Stream Ninja com handshake automático. Deixe a aba da live e a Dock (&api) abertas no Chrome.
       </p>
 
       <button class="btn-primary" onclick="saveAndConnect()">Salvar e Conectar</button>
@@ -1489,7 +1489,9 @@
 
     // Parser Unificado: Social Stream Ninja + Ponte Render
     function handleIncomingPayload(msg) {
-      if (msg && (msg.chatname !== undefined || msg.chatmessage !== undefined)) {
+      if (!msg || typeof msg !== 'object') return;
+
+      if (msg.chatname !== undefined || msg.chatmessage !== undefined) {
         const ssnName = msg.chatname || 'Aluno';
         const ssnAvatar = msg.chatimg || defaultAvatars[0];
         const ssnEvent = String(msg.event || '').toLowerCase();
@@ -1559,7 +1561,11 @@
           dot.classList.add('connected');
           status.textContent = ssnMode ? 'AO VIVO (SSN)' : 'AO VIVO';
 
-          if (!ssnMode) {
+          if (ssnMode) {
+            const sessionMatch = url.match(/join\/([^\/]+)/);
+            const sessionId = sessionMatch ? sessionMatch[1] : 'vU2U3Q7T2H';
+            ws.send(JSON.stringify({ join: sessionId, out: 3, in: 4 }));
+          } else {
             keepAliveTimer = setInterval(() => {
               if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send('ping');
@@ -1581,7 +1587,12 @@
 
         ws.onmessage = (event) => {
           try {
-            const parsed = JSON.parse(event.data);
+            let parsed = JSON.parse(event.data);
+            if (parsed && typeof parsed.data === 'string') {
+              parsed = JSON.parse(parsed.data);
+            } else if (parsed && parsed.data && typeof parsed.data === 'object' && !parsed.event) {
+              parsed = parsed.data;
+            }
             if (Array.isArray(parsed)) {
               parsed.forEach(item => handleIncomingPayload(item));
             } else {
@@ -1613,7 +1624,7 @@
         input.value = SSN_DEFAULT_URL;
         btnSsn.classList.add('active');
         btnRender.classList.remove('active');
-        helper.innerHTML = 'Conectado à sessão <b>vU2U3Q7T2H</b> do Social Stream Ninja. Deixe a aba da live aberta no Chrome.';
+        helper.innerHTML = 'Conectado à sessão <b>vU2U3Q7T2H</b> do Social Stream Ninja com handshake automático. Deixe a aba da live e a Dock (&api) abertas no Chrome.';
       } else {
         input.value = RENDER_DEFAULT_URL;
         btnRender.classList.add('active');
