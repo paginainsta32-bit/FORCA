@@ -1679,7 +1679,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       startNewRound();
-      const savedUrl = localStorage.getItem('tiktok_forca_ws_url') || SSN_DEFAULT_URL;
+      const savedUrl = localStorage.getItem('tiktok_forca_ws_url') || RENDER_DEFAULT_URL;
       document.getElementById('ws-url-input').value = savedUrl;
       updatePresetButtons(savedUrl);
       connectWebSocket(savedUrl);
