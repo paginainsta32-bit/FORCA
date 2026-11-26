@@ -625,43 +625,73 @@
       position: absolute;
       inset: 0;
       z-index: 50;
-      background: rgba(24, 15, 10, 0.96);
-      padding: 22px;
+      background: rgba(24, 15, 10, 0.97);
+      padding: 18px;
       display: none;
       flex-direction: column;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
+      overflow-y: auto;
     }
 
     #config-modal.open {
       display: flex;
     }
 
+    .preset-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      background: #263238;
+      border: 1.5px solid #4dd0e1;
+      color: #e0f7fa;
+      padding: 8px 6px;
+      border-radius: 10px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+
+    .preset-btn.active {
+      background: #00695c;
+      border-color: #00e676;
+      color: #fff;
+    }
+
     .input-group label {
       display: block;
-      font-size: 13px;
+      font-size: 12.5px;
       color: #ffe082;
       margin-bottom: 4px;
     }
 
     .input-group input {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       border-radius: 10px;
       border: 2px solid #ffd54f;
       background: rgba(255, 255, 255, 0.1);
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
+    }
+
+    .helper-hint {
+      font-size: 11px;
+      color: #b0bec5;
+      line-height: 1.3;
     }
 
     .btn-primary {
       background: #ffd54f;
       color: #3e2723;
       border: none;
-      padding: 12px;
+      padding: 11px;
       border-radius: 12px;
       font-family: 'Fredoka', sans-serif;
-      font-size: 15px;
+      font-size: 14.5px;
       cursor: pointer;
     }
 
@@ -669,10 +699,10 @@
       background: rgba(255, 255, 255, 0.14);
       color: #fff;
       border: 1.5px solid rgba(255, 255, 255, 0.3);
-      padding: 11px;
+      padding: 9px;
       border-radius: 12px;
       font-family: 'Fredoka', sans-serif;
-      font-size: 13px;
+      font-size: 12.5px;
       cursor: pointer;
     }
   </style>
@@ -849,11 +879,21 @@
 
     <!-- Modal -->
     <div id="config-modal">
-      <h2 style="color: #ffd54f; text-align: center;">Configurar Live & Testes</h2>
-      <div class="input-group">
-        <label>URL WebSocket (Render):</label>
-        <input type="text" id="ws-url-input" placeholder="wss://ponte-tiktok-yfrh.onrender.com" />
+      <h2 style="color: #ffd54f; text-align: center; font-size: 19px;">Conectar Chat da Live</h2>
+
+      <div class="preset-row">
+        <button class="preset-btn" id="btn-preset-ssn" onclick="selectPreset('ssn')">🔌 Social Stream Ninja (Sem Limite)</button>
+        <button class="preset-btn" id="btn-preset-render" onclick="selectPreset('render')">☁️ Ponte Render</button>
       </div>
+
+      <div class="input-group">
+        <label>URL WebSocket:</label>
+        <input type="text" id="ws-url-input" placeholder="wss://io.socialstream.ninja/join/vU2U3Q7T2H/4" />
+      </div>
+      <p class="helper-hint" id="ws-helper-text">
+        Conectado à sessão <b>vU2U3Q7T2H</b> do Social Stream Ninja. Deixe a aba da live aberta no Chrome.
+      </p>
+
       <button class="btn-primary" onclick="saveAndConnect()">Salvar e Conectar</button>
       <hr style="border-color: rgba(255,255,255,0.15);">
       <button class="btn-secondary" id="sim-btn" onclick="toggleSimulation()">▶️ Simular Alunos Jogando</button>
@@ -866,6 +906,9 @@
   </div>
 
   <script>
+    const SSN_DEFAULT_URL = 'wss://io.socialstream.ninja/join/vU2U3Q7T2H/4';
+    const RENDER_DEFAULT_URL = 'wss://ponte-tiktok-yfrh.onrender.com';
+
     const WORDS = [
       // Frutas & Comidas (50)
       { word: "ABACAXI", category: "Fruta" },
@@ -1013,7 +1056,7 @@
       { word: "ESTANTE", category: "Sala" },
       { word: "CABIDE", category: "Quarto" },
       { word: "COBERTOR", category: "Quarto" },
-      { word: "LENÇOL", category: "Quarto" },
+      { word: "LENCOL", category: "Quarto" },
       { word: "CARREGADOR", category: "Eletrônico" },
       { word: "FONE", category: "Eletrônico" },
       { word: "IMPRESSORA", category: "Tecnologia" },
@@ -1107,6 +1150,7 @@
 
     function extractTikTokAvatar(data) {
       return (
+        data.chatimg ||
         data.profilePictureUrl ||
         data.user?.profilePictureUrl ||
         data.avatarThumb?.urlList?.[0] ||
@@ -1188,7 +1232,6 @@
         setTimeout(() => playTone(1046.5, 0.3, 0.1), 220);
       }
 
-      // Chuva de Confetes
       const colors = isGift
         ? ['#ffea00', '#ff4081', '#00e5ff', '#76ff03', '#ffffff']
         : ['#ffd54f', '#00e676', '#ff5252', '#40c4ff', '#ea80fc', '#ffffff'];
@@ -1329,11 +1372,12 @@
     }
 
     function processChat(name, avatar, rawComment) {
-      if (!roundActive) return;
-      const clean = normalizeText(rawComment);
+      if (!roundActive || !rawComment) return;
+      const stripped = String(rawComment).replace(/<[^>]*>/g, '').trim();
+      const clean = normalizeText(stripped);
       if (!clean) return;
 
-      addGuessPill(name, avatar, rawComment.slice(0, 18));
+      addGuessPill(name, avatar, stripped.slice(0, 18));
       const targetWord = WORDS[currentIdx].word;
 
       // Caso 1: Palavra inteira
@@ -1443,7 +1487,54 @@
       toggleModal();
     }
 
-    // WebSocket Ponte TikTok com Keep-Alive e Reconexão Automática
+    // Parser Unificado: Social Stream Ninja + Ponte Render
+    function handleIncomingPayload(msg) {
+      if (msg && (msg.chatname !== undefined || msg.chatmessage !== undefined)) {
+        const ssnName = msg.chatname || 'Aluno';
+        const ssnAvatar = msg.chatimg || defaultAvatars[0];
+        const ssnEvent = String(msg.event || '').toLowerCase();
+
+        if (ssnEvent.includes('follow')) {
+          showFollowCelebration(ssnName, ssnAvatar);
+          return;
+        }
+
+        if (msg.hasDonation || ssnEvent.includes('gift') || ssnEvent.includes('donation')) {
+          const giftLabel = typeof msg.hasDonation === 'string' ? msg.hasDonation : 'Presente';
+          showGiftCelebration(ssnName, ssnAvatar, giftLabel, 1);
+          revealHelpLetter();
+          document.getElementById('teacher-speech').textContent = `Valeu ${ssnName}! Letra revelada! 💡`;
+          return;
+        }
+
+        if (msg.chatmessage) {
+          processChat(ssnName, ssnAvatar, msg.chatmessage);
+        }
+        return;
+      }
+
+      const ev = msg.event || msg.type;
+      if (ev === 'heartbeat' || ev === 'pong' || ev === 'status') return;
+
+      const data = msg.data || msg;
+      const name = data.nickname || data.user?.nickname || data.uniqueId || 'Aluno';
+      const avatar = extractTikTokAvatar(data);
+
+      if (ev === 'chat' && data.comment) {
+        processChat(name, avatar, data.comment);
+      } else if (ev === 'follow') {
+        showFollowCelebration(name, avatar);
+      } else if (ev === 'gift') {
+        showGiftCelebration(name, avatar, data.giftName || 'Presente', data.repeatCount || 1);
+        revealHelpLetter();
+        document.getElementById('teacher-speech').textContent = `Valeu ${name}! Letra revelada! 💡`;
+      }
+    }
+
+    function isSsnUrl(url) {
+      return url.includes('socialstream.ninja') || url.includes('127.0.0.1') || url.includes('localhost');
+    }
+
     function connectWebSocket(url) {
       if (!url) return;
       currentWsUrl = url;
@@ -1458,27 +1549,30 @@
 
       const dot = document.getElementById('ws-dot');
       const status = document.getElementById('ws-status');
-      status.textContent = 'CONECTANDO...';
+      const ssnMode = isSsnUrl(url);
+      status.textContent = ssnMode ? 'CONECTANDO SSN...' : 'CONECTANDO...';
 
       try {
         ws = new WebSocket(url);
 
         ws.onopen = () => {
           dot.classList.add('connected');
-          status.textContent = 'AO VIVO';
+          status.textContent = ssnMode ? 'AO VIVO (SSN)' : 'AO VIVO';
 
-          keepAliveTimer = setInterval(() => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-              ws.send('ping');
-            }
-          }, 7000);
+          if (!ssnMode) {
+            keepAliveTimer = setInterval(() => {
+              if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send('ping');
+              }
+            }, 7000);
+          }
         };
 
         ws.onclose = () => {
           clearInterval(keepAliveTimer);
           dot.classList.remove('connected');
           status.textContent = 'RECONECTANDO...';
-          reconnectTimer = setTimeout(() => connectWebSocket(currentWsUrl), 1500);
+          reconnectTimer = setTimeout(() => connectWebSocket(currentWsUrl), 2000);
         };
 
         ws.onerror = () => {
@@ -1487,28 +1581,17 @@
 
         ws.onmessage = (event) => {
           try {
-            const msg = JSON.parse(event.data);
-            const ev = msg.event || msg.type;
-            if (ev === 'heartbeat' || ev === 'pong' || ev === 'status') return;
-
-            const data = msg.data || msg;
-            const name = data.nickname || data.user?.nickname || data.uniqueId || 'Aluno';
-            const avatar = extractTikTokAvatar(data);
-
-            if (ev === 'chat' && data.comment) {
-              processChat(name, avatar, data.comment);
-            } else if (ev === 'follow') {
-              showFollowCelebration(name, avatar);
-            } else if (ev === 'gift') {
-              showGiftCelebration(name, avatar, data.giftName || 'Presente', data.repeatCount || 1);
-              revealHelpLetter();
-              document.getElementById('teacher-speech').textContent = `Valeu ${name}! Letra revelada! 💡`;
+            const parsed = JSON.parse(event.data);
+            if (Array.isArray(parsed)) {
+              parsed.forEach(item => handleIncomingPayload(item));
+            } else {
+              handleIncomingPayload(parsed);
             }
           } catch (e) {}
         };
       } catch (e) {
         status.textContent = 'ERRO URL';
-        reconnectTimer = setTimeout(() => connectWebSocket(currentWsUrl), 2000);
+        reconnectTimer = setTimeout(() => connectWebSocket(currentWsUrl), 2500);
       }
     }
 
@@ -1520,13 +1603,45 @@
       }
     });
 
+    function selectPreset(mode) {
+      const input = document.getElementById('ws-url-input');
+      const btnSsn = document.getElementById('btn-preset-ssn');
+      const btnRender = document.getElementById('btn-preset-render');
+      const helper = document.getElementById('ws-helper-text');
+
+      if (mode === 'ssn') {
+        input.value = SSN_DEFAULT_URL;
+        btnSsn.classList.add('active');
+        btnRender.classList.remove('active');
+        helper.innerHTML = 'Conectado à sessão <b>vU2U3Q7T2H</b> do Social Stream Ninja. Deixe a aba da live aberta no Chrome.';
+      } else {
+        input.value = RENDER_DEFAULT_URL;
+        btnRender.classList.add('active');
+        btnSsn.classList.remove('active');
+        helper.innerHTML = 'Conecta na sua ponte hospedada no <b>Render</b> (<code>wss://ponte-tiktok-yfrh.onrender.com</code>).';
+      }
+    }
+
+    function updatePresetButtons(url) {
+      const btnSsn = document.getElementById('btn-preset-ssn');
+      const btnRender = document.getElementById('btn-preset-render');
+      if (isSsnUrl(url)) {
+        btnSsn.classList.add('active');
+        btnRender.classList.remove('active');
+      } else {
+        btnRender.classList.add('active');
+        btnSsn.classList.remove('active');
+      }
+    }
+
     function toggleModal() {
       document.getElementById('config-modal').classList.toggle('open');
     }
 
     function saveAndConnect() {
       const url = document.getElementById('ws-url-input').value.trim();
-      localStorage.setItem('tiktok_ws_url', url);
+      localStorage.setItem('tiktok_forca_ws_url', url);
+      updatePresetButtons(url);
       connectWebSocket(url);
       toggleModal();
     }
@@ -1553,9 +1668,9 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       startNewRound();
-      const defaultUrl = 'wss://ponte-tiktok-yfrh.onrender.com';
-      const savedUrl = localStorage.getItem('tiktok_ws_url') || defaultUrl;
+      const savedUrl = localStorage.getItem('tiktok_forca_ws_url') || SSN_DEFAULT_URL;
       document.getElementById('ws-url-input').value = savedUrl;
+      updatePresetButtons(savedUrl);
       connectWebSocket(savedUrl);
     });
   </script>
